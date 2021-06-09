@@ -1,21 +1,41 @@
 import pygetwindow as gw
-import pyautogui as pg, PIL.ImageGrab
+import pyautogui as pg
+import PIL.ImageGrab
 from time import sleep
+import random
 
 leagueClient = gw.getWindowsWithTitle('League of Legends')[0]
-leagueClient.minimize()
-leagueClient.restore()
+lastChampionPosition = 1
+
+
+def randomChampionPosition():
+    global lastChampionPosition
+    newChampionPosition = random.randint(1, 5)
+    if (newChampionPosition != lastChampionPosition):
+        lastChampionPosition = newChampionPosition
+        return newChampionPosition
+    else:
+        return randomChampionPosition()
+
+
+def bringClientToTop():
+    leagueClient.minimize()
+    leagueClient.restore()
+
+
+bringClientToTop()
 
 xAcceptButton = leagueClient.left + 640
 yAcceptButton = leagueClient.top + 557
 
-def getPixelColor(x, y):
-    return PIL.ImageGrab.grab().load()[x, y]
+
+def getPixelColor(xAxis, yAxis):
+    return PIL.ImageGrab.grab().load()[xAxis, yAxis]
 
 
 defaultPixelColor = getPixelColor(xAcceptButton, yAcceptButton)
 acceptButtonColor = (30, 37, 42)
-pingBallColor = (38, 78, 52)
+pingBallColor = (38, 82, 55)
 mapCenterColor = (17, 53, 50)
 
 
@@ -25,11 +45,13 @@ def arrayFilter(haystack, needle):
             return True
     return False
 
-def moveAndClick(x, y):
-    pg.moveTo(x, y, 1)
+
+def moveAndClick(xAxis, yAxis):
+    pg.moveTo(xAxis, yAxis, 1)
     pg.mouseDown()
-    sleep(0.2)
+    sleep(0.5)
     pg.mouseUp()
+
 
 def clickOnAcceptButton():
     xFindQueue = leagueClient.left + 539
@@ -37,92 +59,118 @@ def clickOnAcceptButton():
     pg.moveTo(xFindQueue, yFindQueue, 1)
     pg.click()
 
+
 def clickOnAcceptGame():
     pg.moveTo(xAcceptButton, yAcceptButton, 1)
     pg.click()
 
+
 def checkGameExists():
     allWindows = gw.getAllTitles()
-    arrayFilter(allWindows, 'League of Legends (TM) Client')
+    return arrayFilter(allWindows, 'League of Legends (TM) Client')
+
+
+def buyChampion(position):
+    pixelsBetweenChampions = 170
+    champion = firstChampion + ((position - 1) * pixelsBetweenChampions)
+    moveAndClick(champion, championsRow)
+
+
+def buyXp():
+    yXp = leagueGameClient.top + 830
+    xXp = leagueGameClient.left + 307
+    moveAndClick(xXp, yXp)
+
+
+def checkEndGameLose():
+    defaulCloseGameColor = (200, 155, 60)
+    closeGameColor = getPixelColor(xCloseGame, yCloseGame)
+    print(defaulCloseGameColor, closeGameColor)
+    return defaulCloseGameColor == closeGameColor
+
+
+def checkEndGameVictory():
+    defaulCloseGameColorVictory = (186, 23, 18)
+    closeGameColorVictory = getPixelColor(xCloseGameVictory, yCloseGameVictory)
+    return defaulCloseGameColorVictory == closeGameColorVictory
 
 
 while True:
     clickOnAcceptButton()
+    print('encontrar partida')
 
     while (True):
         if (getPixelColor(xAcceptButton, yAcceptButton) == acceptButtonColor):
             clickOnAcceptGame()
-            sleep(10)
+            print('aceitar partida')
+            sleep(5)
+            # if (getPixelColor(xAcceptButton, yAcceptButton) == acceptButtonColor):
             break
 
+    leagueGameClient = gw.getWindowsWithTitle(
+        'League of Legends (TM) Client')[0]
     while (True):
         if (checkGameExists()):
-            leagueGameClient = gw.getWindowsWithTitle('League of Legends (TM) Client')[0]
+            leagueGameClient = gw.getWindowsWithTitle(
+                'League of Legends (TM) Client')[0]
             sleep(5)
             xPingBall = leagueGameClient.left + 25
             yPingBall = leagueGameClient.top + 42
             if (getPixelColor(xPingBall, yPingBall) == pingBallColor):
+                print('partida iniciada')
                 break
-    
+
     levelColor = (240, 230, 210)
     xLevel = leagueGameClient.left + 237
     yLevel = leagueGameClient.top + 767
+    xDefeatedGame = leagueGameClient.left + 812
+    yDefeatedGame = leagueGameClient.top + 356
+    xCloseGame = leagueGameClient.left + 690
+    yCloseGame = leagueGameClient.top + 485
+    xCloseGameVictory = leagueGameClient.left + 810
+    yCloseGameVictory = leagueGameClient.top + 554
 
-    secondsLeft = 900
-    while (secondsLeft > 0):
-        secondsLeft = secondsLeft - 1
-        sleep(1)
+    while (True):
+        sleep(5)
 
         if (getPixelColor(xLevel, yLevel) == levelColor):
             championsRow = leagueGameClient.top + 852
             firstChampion = leagueGameClient.left + 479
 
-            def buyChampion(position):
-                pixelsBetweenChampions = 170
-                champion = firstChampion + ((position - 1) * pixelsBetweenChampions)
-                moveAndClick(champion, championsRow)
+            randomValue = randomChampionPosition()
+            if (randomValue == 1):
+                buyChampion(randomChampionPosition())
+                buyChampion(randomChampionPosition())
 
-            def buyXp():
-                yXp = leagueGameClient.top + 830
-                xXp = leagueGameClient.left + 307
-                moveAndClick(xXp, yXp)
+            if (randomValue == 2):
+                buyChampion(randomChampionPosition())
 
-            if (secondsLeft == 830):
-                buyChampion(1)
-                buyChampion(4)
-
-            if (secondsLeft == 775):
-                buyChampion(2)
-
-            if (secondsLeft == 709):
-                buyChampion(1)
+            if (randomValue == 3):
+                buyChampion(randomChampionPosition())
                 buyXp()
 
-            if (secondsLeft == 660):
-                buyChampion(3)
+            if (randomValue == 4):
+                buyXp()
+                buyChampion(randomChampionPosition())
+                buyChampion(randomChampionPosition())
 
-            if (secondsLeft == 590):
-                buyChampion(2)
-
-            if (secondsLeft == 320):
-                buyChampion(2)
+            if (randomValue == 5):
                 buyXp()
 
-            if (secondsLeft == 260):
-                buyXp()
-                buyChampion(1)
-                buyChampion(4)
+            print('ação tomada')
 
-            if (secondsLeft == 60):
-                buyXp()
-    break
+        if (checkEndGameLose()):
+            moveAndClick(xCloseGame, yCloseGame)
+            print('derrota')
+            sleep(20)
+            bringClientToTop()
+            clickOnAcceptButton()
+            break
 
-# xPingBall = leagueGameClient.left + 41
-# yPingBall = leagueGameClient.top + 25
-# xMapWhiteCorner =  leagueGameClient.left + 838
-# xMapCenterCorner = leagueGameClient.left + 841
-# yMapCenterCorner = leagueGameClient.top + 1515
-# print(leagueClient.width)
-# print(leagueClient.height)
-# print(leagueClient.top)
-# print(leagueClient.left)
+        if (checkEndGameVictory()):
+            moveAndClick(xCloseGameVictory, yCloseGameVictory)
+            print('vitória')
+            sleep(20)
+            bringClientToTop()
+            clickOnAcceptButton()
+            break
