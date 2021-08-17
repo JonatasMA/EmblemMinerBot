@@ -25,6 +25,8 @@ Após tudo pronto, pode se executar o seguinte comando dentro da pasta/diretóri
 python .\bot.py
 ```
 ## en
+
+⚠ Work in progress ⚠  
 A TFT bot used to farm event pass tokens made with Python
 
 1280x720
