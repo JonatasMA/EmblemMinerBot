@@ -4,6 +4,8 @@ import PIL.ImageGrab
 from time import sleep
 import random
 
+# Um comentário desnecessário
+
 leagueClient = gw.getWindowsWithTitle('League of Legends')[0]
 lastChampionPosition = 1
 
